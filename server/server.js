@@ -224,6 +224,16 @@ async function updateUserProfile(userId, updates) {
   return normalizeUser(rows[0]);
 }
 
+app.get("/debug/schema", async (req, res) => {
+  try {
+    const columns = await getAppUserColumns();
+    res.json({ columns: Array.from(columns).sort() });
+  } catch (err) {
+    console.error("Schema debug failed:", err?.message || err);
+    res.status(500).json({ error: "Schema debug failed" });
+  }
+});
+
 app.post("/auth/google", async (req, res) => {
   try {
     const { idToken } = req.body;
