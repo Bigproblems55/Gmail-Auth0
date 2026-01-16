@@ -1,23 +1,27 @@
 import { useEffect, useRef } from "react";
 import type { User } from "../types/auth";
 
-type GoogleCredentialResponse = {
-  credential: string;
-};
-
-type GoogleLoginButtonProps = {
+type Props = {
   onLogin?: (user: User) => void;
 };
 
-export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
+type AuthGoogleResponse = {
+  user: User;
+};
+
+export default function GoogleLoginButton({ onLogin }: Props) {
   const btnRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!window.google || !btnRef.current) return;
+    const google = window.google;
+    if (!google || !btnRef.current) return;
 
-    window.google.accounts.id.initialize({
+    google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: async (response: GoogleCredentialResponse) => {
+      callback: async (response) => {
+        console.log("Google credential received", response?.credential?.slice(0, 20));
+        console.log("Posting token to API", import.meta.env.VITE_API_URL);
+
         const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -29,12 +33,13 @@ export default function GoogleLoginButton({ onLogin }: GoogleLoginButtonProps) {
           console.error("Login failed");
           return;
         }
-        const data = await res.json();
+
+        const data = (await res.json()) as AuthGoogleResponse;
         onLogin?.(data.user);
       },
     });
 
-    window.google.accounts.id.renderButton(btnRef.current, {
+    google.accounts.id.renderButton(btnRef.current, {
       theme: "outline",
       size: "large",
       text: "continue_with",
