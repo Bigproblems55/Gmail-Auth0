@@ -84,7 +84,15 @@ async function selectUser(whereClause, params) {
   return normalizeUser(rows[0]);
 }
 
-async function upsertUserByEmail(email, name, picture, googleSub) {
+function deriveUsername(claims) {
+  const fullName = claims?.name?.trim();
+  if (fullName) return fullName.toLowerCase().replace(/\s+/g, "");
+  const email = claims?.email?.trim();
+  if (!email) return null;
+  return email.split("@")[0] || null;
+}
+
+async function upsertUserByEmail(email, name, picture, googleSub, username) {
   const columns = await getAppUserColumns();
   if (!columns.has("id") || !columns.has("email")) {
     throw new Error("app_users must include id and email columns");
@@ -111,6 +119,10 @@ async function upsertUserByEmail(email, name, picture, googleSub) {
     if (columns.has("google_sub") && googleSub) {
       updates.push(`google_sub = $${idx++}`);
       values.push(googleSub);
+    }
+    if (columns.has("username") && !user.username && username) {
+      updates.push(`username = $${idx++}`);
+      values.push(username);
     }
 
     if (updates.length > 0) {
@@ -147,6 +159,10 @@ async function upsertUserByEmail(email, name, picture, googleSub) {
     insertColumns.push("google_sub");
     insertValues.push(googleSub);
   }
+  if (columns.has("username") && username) {
+    insertColumns.push("username");
+    insertValues.push(username);
+  }
   if (columns.has("role")) {
     insertColumns.push("role");
     insertValues.push("user");
@@ -161,6 +177,49 @@ async function upsertUserByEmail(email, name, picture, googleSub) {
       returning ${selectColumns.join(", ")}
     `,
     insertValues
+  );
+  return normalizeUser(rows[0]);
+}
+
+async function updateUserProfile(userId, updates) {
+  const columns = await getAppUserColumns();
+  const allowed = [
+    "username",
+    "bio",
+    "phone",
+    "address_line1",
+    "address_line2",
+    "address_city",
+    "address_state",
+    "address_postal",
+    "address_country",
+  ].filter((field) => columns.has(field));
+
+  const setParts = [];
+  const values = [];
+  let idx = 1;
+
+  for (const field of allowed) {
+    if (Object.prototype.hasOwnProperty.call(updates, field)) {
+      setParts.push(`${field} = $${idx++}`);
+      values.push(updates[field]);
+    }
+  }
+
+  if (setParts.length === 0) {
+    return selectUser("id = $1", [userId]);
+  }
+
+  values.push(userId);
+  const selectColumns = desiredUserFields.filter((field) => columns.has(field));
+  const { rows } = await pool.query(
+    `
+      update app_users
+      set ${setParts.join(", ")}
+      where id = $${idx}
+      returning ${selectColumns.join(", ")}
+    `,
+    values
   );
   return normalizeUser(rows[0]);
 }
@@ -188,7 +247,14 @@ app.post("/auth/google", async (req, res) => {
     const name = claims.name ?? null;
     const picture = claims.picture ?? null;
     const googleSub = claims.sub ?? null;
-    const user = await upsertUserByEmail(email, name, picture, googleSub);
+    const username = deriveUsername(claims);
+    const user = await upsertUserByEmail(
+      email,
+      name,
+      picture,
+      googleSub,
+      username
+    );
     if (!user?.id) {
       return res.status(500).json({ error: "User id missing after login" });
     }
@@ -224,6 +290,22 @@ app.get("/me", async (req, res) => {
     res.json({ user });
   } catch {
     res.status(401).json({ error: "Not logged in" });
+  }
+});
+
+app.post("/profile", async (req, res) => {
+  try {
+    const token = req.cookies.session;
+    if (!token) return res.status(401).json({ error: "Not logged in" });
+
+    const payload = verifySession(token);
+    const user = await updateUserProfile(payload.uid, req.body || {});
+    if (!user) return res.status(401).json({ error: "Session user missing" });
+
+    res.json({ user });
+  } catch (err) {
+    console.error("Profile update failed:", err?.message || err);
+    res.status(400).json({ error: "Profile update failed" });
   }
 });
 
