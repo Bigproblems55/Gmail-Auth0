@@ -1,59 +1,59 @@
-import { useMemo, useState } from "react";
-import type { User } from "../types/auth";
+import { useMemo, useState } from "react"; // React hooks for state and memo.
+import type { User } from "../types/auth"; // User shape from the API.
 
 type Props = {
-  user: User;
-  onSave?: (user: User) => void;
+  user: User; // Current user record.
+  onSave?: (user: User) => void; // Called after save completes.
 };
 
 type ProfileUpdateBody = {
-  username?: string | null;
-  bio?: string | null;
-  phone?: string | null;
-  address_line1?: string | null;
-  address_line2?: string | null;
-  address_city?: string | null;
-  address_state?: string | null;
-  address_postal?: string | null;
-  address_country?: string | null;
+  username?: string | null; // Optional username update.
+  bio?: string | null; // Optional bio update.
+  phone?: string | null; // Optional phone update.
+  address_line1?: string | null; // Optional address line 1.
+  address_line2?: string | null; // Optional address line 2.
+  address_city?: string | null; // Optional city.
+  address_state?: string | null; // Optional state/region.
+  address_postal?: string | null; // Optional postal code.
+  address_country?: string | null; // Optional country code.
 };
 
-type ProfileUpdateResponse = { user: User } | { error: string };
+type ProfileUpdateResponse = { user: User } | { error: string }; // /profile response.
 
-export default function ProfileEditor({ user, onSave }: Props) {
-  const api = import.meta.env.VITE_API_URL;
+export default function ProfileEditor({ user, onSave }: Props) { // Profile form component.
+  const api = import.meta.env.VITE_API_URL; // API base URL.
 
   const initial = useMemo(
     () => ({
-      username: user.username ?? "",
-      bio: user.bio ?? "",
-      phone: user.phone ?? "",
-      address_line1: user.address_line1 ?? "",
-      address_line2: user.address_line2 ?? "",
-      address_city: user.address_city ?? "",
-      address_state: user.address_state ?? "",
-      address_postal: user.address_postal ?? "",
-      address_country: user.address_country ?? "",
+      username: user.username ?? "", // Default username value.
+      bio: user.bio ?? "", // Default bio value.
+      phone: user.phone ?? "", // Default phone value.
+      address_line1: user.address_line1 ?? "", // Default address line 1.
+      address_line2: user.address_line2 ?? "", // Default address line 2.
+      address_city: user.address_city ?? "", // Default city.
+      address_state: user.address_state ?? "", // Default state/region.
+      address_postal: user.address_postal ?? "", // Default postal code.
+      address_country: user.address_country ?? "", // Default country.
     }),
-    [user]
+    [user] // Recompute initial state when user changes.
   );
 
-  const [form, setForm] = useState(initial);
-  const [saving, setSaving] = useState(false);
-  const [err, setErr] = useState<string>("");
+  const [form, setForm] = useState(initial); // Editable form state.
+  const [saving, setSaving] = useState(false); // Save in progress flag.
+  const [err, setErr] = useState<string>(""); // Inline error message.
 
-  function setField<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
-    setForm((p) => ({ ...p, [k]: v }));
-  }
+  function setField<K extends keyof typeof form>(k: K, v: (typeof form)[K]) { // Update a single field.
+    setForm((p) => ({ ...p, [k]: v })); // Merge new field into form state.
+  } // End setField.
 
-  async function save() {
-    setSaving(true);
-    setErr("");
+  async function save() { // Submit updates to the API.
+    setSaving(true); // Disable submit while saving.
+    setErr(""); // Clear previous errors.
 
     const body: ProfileUpdateBody = {
-      username: form.username.trim() ? form.username.trim() : null,
-      bio: form.bio.trim() ? form.bio.trim() : null,
-      phone: form.phone.trim() ? form.phone.trim() : null,
+      username: form.username.trim() ? form.username.trim() : null, // Normalize empty to null.
+      bio: form.bio.trim() ? form.bio.trim() : null, // Normalize empty to null.
+      phone: form.phone.trim() ? form.phone.trim() : null, // Normalize empty to null.
       address_line1: form.address_line1.trim() ? form.address_line1.trim() : null,
       address_line2: form.address_line2.trim() ? form.address_line2.trim() : null,
       address_city: form.address_city.trim() ? form.address_city.trim() : null,
@@ -62,37 +62,37 @@ export default function ProfileEditor({ user, onSave }: Props) {
       address_country: form.address_country.trim()
         ? form.address_country.trim().toUpperCase()
         : null,
-    };
+    }; // End request payload.
 
     const res = await fetch(`${api}/profile`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(body),
+      method: "POST", // Update profile via POST.
+      headers: { "Content-Type": "application/json" }, // JSON body.
+      credentials: "include", // Send session cookie.
+      body: JSON.stringify(body), // Serialized payload.
     });
 
-    setSaving(false);
+    setSaving(false); // Re-enable submit.
 
-    const data = (await res.json().catch(() => ({}))) as ProfileUpdateResponse;
+    const data = (await res.json().catch(() => ({}))) as ProfileUpdateResponse; // Parse response.
 
-    if (!res.ok) {
-      const msg = "error" in data ? data.error : "Save failed";
-      setErr(msg);
-      return;
+    if (!res.ok) { // Handle error response.
+      const msg = "error" in data ? data.error : "Save failed"; // Pick error message.
+      setErr(msg); // Show error in UI.
+      return; // Stop on failure.
     }
 
-    if ("user" in data) onSave?.(data.user);
-  }
+    if ("user" in data) onSave?.(data.user); // Notify parent with updated user.
+  } // End save.
 
-  return (
-    <div style={{ marginTop: 18, maxWidth: 640 }}>
-      <h3>Profile</h3>
+  return ( // Render profile form.
+    <div style={{ marginTop: 18, maxWidth: 640 }}>{/* Form container */}
+      <h3>Profile</h3> {/* Section title */}
 
-      <div style={{ marginBottom: 10, opacity: 0.85 }}>
-        Role: <b>{user.role}</b>
-      </div>
+      <div style={{ marginBottom: 10, opacity: 0.85 }}>{/* Role row */}
+        Role: <b>{user.role}</b> {/* Current role */}
+      </div> {/* End role row */}
 
-      {err && (
+      {err && ( // Show error if present.
         <div
           style={{
             marginBottom: 10,
@@ -101,105 +101,105 @@ export default function ProfileEditor({ user, onSave }: Props) {
             borderRadius: 10,
           }}
         >
-          {err}
+          {err} {/* Error message */}
         </div>
-      )}
+      )} {/* End error block */}
 
-      <div style={{ display: "grid", gap: 10 }}>
+      <div style={{ display: "grid", gap: 10 }}>{/* Form fields grid */}
         <label>
-          Username
+          Username {/* Field label */}
           <input
             value={form.username}
             onChange={(e) => setField("username", e.target.value)}
             style={{ width: "100%", padding: 10, marginTop: 6 }}
           />
-        </label>
+        </label> {/* End username field */}
 
         <label>
-          Bio
+          Bio {/* Field label */}
           <textarea
             value={form.bio}
             onChange={(e) => setField("bio", e.target.value)}
             rows={4}
             style={{ width: "100%", padding: 10, marginTop: 6 }}
           />
-        </label>
+        </label> {/* End bio field */}
 
         <label>
-          Phone
+          Phone {/* Field label */}
           <input
             value={form.phone}
             onChange={(e) => setField("phone", e.target.value)}
             placeholder="+1..."
             style={{ width: "100%", padding: 10, marginTop: 6 }}
           />
-        </label>
+        </label> {/* End phone field */}
 
-        <h4 style={{ margin: "10px 0 0" }}>Address</h4>
+        <h4 style={{ margin: "10px 0 0" }}>Address</h4> {/* Address section */}
 
         <label>
-          Line 1
+          Line 1 {/* Field label */}
           <input
             value={form.address_line1}
             onChange={(e) => setField("address_line1", e.target.value)}
             style={{ width: "100%", padding: 10, marginTop: 6 }}
           />
-        </label>
+        </label> {/* End address line 1 */}
 
         <label>
-          Line 2
+          Line 2 {/* Field label */}
           <input
             value={form.address_line2}
             onChange={(e) => setField("address_line2", e.target.value)}
             style={{ width: "100%", padding: 10, marginTop: 6 }}
           />
-        </label>
+        </label> {/* End address line 2 */}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>{/* City/State row */}
           <label>
-            City
+            City {/* Field label */}
             <input
               value={form.address_city}
               onChange={(e) => setField("address_city", e.target.value)}
               style={{ width: "100%", padding: 10, marginTop: 6 }}
             />
-          </label>
+          </label> {/* End city field */}
 
           <label>
-            State/Region
+            State/Region {/* Field label */}
             <input
               value={form.address_state}
               onChange={(e) => setField("address_state", e.target.value)}
               style={{ width: "100%", padding: 10, marginTop: 6 }}
             />
-          </label>
-        </div>
+          </label> {/* End state field */}
+        </div> {/* End city/state row */}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>{/* Postal/Country row */}
           <label>
-            Postal
+            Postal {/* Field label */}
             <input
               value={form.address_postal}
               onChange={(e) => setField("address_postal", e.target.value)}
               style={{ width: "100%", padding: 10, marginTop: 6 }}
             />
-          </label>
+          </label> {/* End postal field */}
 
           <label>
-            Country (2-letter)
+            Country (2-letter) {/* Field label */}
             <input
               value={form.address_country}
               onChange={(e) => setField("address_country", e.target.value.toUpperCase())}
               placeholder="US"
               style={{ width: "100%", padding: 10, marginTop: 6 }}
             />
-          </label>
-        </div>
+          </label> {/* End country field */}
+        </div> {/* End postal/country row */}
 
-        <button onClick={save} disabled={saving} style={{ padding: "10px 14px" }}>
-          {saving ? "Saving..." : "Save Profile"}
-        </button>
-      </div>
-    </div>
-  );
-}
+        <button onClick={save} disabled={saving} style={{ padding: "10px 14px" }}>{/* Save button */}
+          {saving ? "Saving..." : "Save Profile"} {/* Button label */}
+        </button> {/* End save button */}
+      </div> {/* End form grid */}
+    </div> {/* End form container. */}
+  ); // End render.
+} // End ProfileEditor.

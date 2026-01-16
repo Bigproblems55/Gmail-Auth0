@@ -1,47 +1,47 @@
-import { useEffect, useState } from "react";
-import GoogleLoginButton from "./components/GoogleLoginButton";
-import ProfileEditor from "./components/ProfileEditor";
-import type { User } from "./types/auth";
+import { useEffect, useState } from "react"; // React state and lifecycle hooks.
+import GoogleLoginButton from "./components/GoogleLoginButton"; // Google sign-in widget.
+import ProfileEditor from "./components/ProfileEditor"; // Editable profile form.
+import type { User } from "./types/auth"; // User shape shared with the API.
 
-type MeResponse = { user: User } | { error: string };
+type MeResponse = { user: User } | { error: string }; // /me API response union.
 
-export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const api = import.meta.env.VITE_API_URL;
+export default function App() { // Main app component.
+  const [user, setUser] = useState<User | null>(null); // Current session user.
+  const api = import.meta.env.VITE_API_URL; // API base URL from env.
 
-  async function loadMe() {
-    const res = await fetch(`${api}/me`, { credentials: "include" });
-    if (!res.ok) {
-      setUser(null);
-      return;
+  async function loadMe() { // Fetch the current session user.
+    const res = await fetch(`${api}/me`, { credentials: "include" }); // Send cookie.
+    if (!res.ok) { // Unauthenticated or invalid session.
+      setUser(null); // Clear user state.
+      return; // Stop on failure.
     }
-    const data = (await res.json()) as MeResponse;
-    if ("user" in data) setUser(data.user);
-    else setUser(null);
-  }
+    const data = (await res.json()) as MeResponse; // Parse response body.
+    if ("user" in data) setUser(data.user); // Store user data.
+    else setUser(null); // Clear on error payload.
+  } // End loadMe.
 
-  useEffect(() => {
-    loadMe();
+  useEffect(() => { // Run once on mount.
+    loadMe(); // Load session user.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Empty deps means only on first render.
 
-  async function logout() {
-    await fetch(`${api}/auth/logout`, {
-      method: "POST",
-      credentials: "include",
+  async function logout() { // Log out by clearing session cookie.
+    await fetch(`${api}/auth/logout`, { // POST to logout endpoint.
+      method: "POST", // Logout uses POST.
+      credentials: "include", // Include session cookie.
     });
-    setUser(null);
-  }
+    setUser(null); // Clear local user state.
+  } // End logout.
 
-  return (
-    <div style={{ padding: 24, fontFamily: "system-ui, sans-serif" }}>
-      <h1>Google Sign-In</h1>
+  return ( // Render UI.
+    <div style={{ padding: 24, fontFamily: "system-ui, sans-serif" }}>{/* App wrapper */}
+      <h1>Google Sign-In</h1> {/* Page title */}
 
-      {!user ? (
-        <>
-          <p>Sign in:</p>
-          <GoogleLoginButton onLogin={(u) => setUser(u)} />
-        </>
+      {!user ? ( // Show login if no user.
+        <> {/* Fragment wrapper */}
+          <p>Sign in:</p> {/* Prompt text */}
+          <GoogleLoginButton onLogin={(u) => setUser(u)} /> {/* Google login */}
+        </> {/* End fragment. */}
       ) : (
         <div
           style={{
@@ -51,16 +51,16 @@ export default function App() {
             borderRadius: 12,
             maxWidth: 700,
           }}
-        >
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            {user.picture ? (
+        > {/* Profile card */}
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>{/* Avatar row */}
+            {user.picture ? ( // Show avatar if present.
               <img
                 src={user.picture}
                 alt="avatar"
                 width={64}
                 height={64}
                 style={{ borderRadius: "50%" }}
-              />
+              /> {/* User avatar image. */}
             ) : (
               <div
                 style={{
@@ -69,37 +69,37 @@ export default function App() {
                   borderRadius: "50%",
                   background: "#eee",
                 }}
-              />
-            )}
+              /> {/* Placeholder avatar. */}
+            )} {/* End avatar conditional */}
 
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>
-                {user.name ?? "No name set"}
-              </div>
-              <div style={{ opacity: 0.8 }}>{user.email}</div>
-              {user.username ? (
-                <div style={{ opacity: 0.8 }}>@{user.username}</div>
-              ) : null}
-            </div>
-          </div>
+            <div>{/* User text details */}
+              <div style={{ fontSize: 18, fontWeight: 700 }}>{/* Name */}
+                {user.name ?? "No name set"} {/* Name value */}
+              </div> {/* End name */}
+              <div style={{ opacity: 0.8 }}>{user.email}</div> {/* Email */}
+              {user.username ? ( // Show username if set.
+                <div style={{ opacity: 0.8 }}>@{user.username}</div> {/* Username line. */}
+              ) : null} {/* End username conditional */}
+            </div> {/* End user text */}
+          </div> {/* End avatar row */}
 
-          <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
-            <button onClick={logout} style={{ padding: "10px 14px" }}>
-              Logout
-            </button>
-            <button onClick={loadMe} style={{ padding: "10px 14px" }}>
-              Refresh profile
-            </button>
-          </div>
+          <div style={{ marginTop: 16, display: "flex", gap: 12 }}>{/* Action buttons */}
+            <button onClick={logout} style={{ padding: "10px 14px" }}>{/* Logout */}
+              Logout {/* Button label */}
+            </button> {/* End logout button */}
+            <button onClick={loadMe} style={{ padding: "10px 14px" }}>{/* Refresh */}
+              Refresh profile {/* Button label */}
+            </button> {/* End refresh button */}
+          </div> {/* End action buttons */}
 
           <ProfileEditor
             user={user}
             onSave={(u) => {
               setUser(u);
             }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+          /> {/* Profile editor form */}
+        </div> {/* End profile card. */}
+      )} {/* End login/profile conditional */}
+    </div> {/* End app wrapper. */}
+  ); // End render.
+} // End App component.
