@@ -11,13 +11,9 @@ declare global { // Extend global type declarations.
           }) => void; // End initialize signature.
           renderButton: ( // Render the sign-in button.
             parent: HTMLElement, // Target container element.
-            options: { // Button render options.
-              theme?: string; // Button theme.
-              size?: string; // Button size.
-              text?: string; // Button text.
-              shape?: string; // Button shape.
-            } // End options.
+            options?: Record<string, unknown> // Button render options.
           ) => void; // End renderButton signature.
+          prompt?: () => void; // Optional prompt helper.
         }; // End id namespace.
       }; // End accounts namespace.
     }; // End google namespace.
