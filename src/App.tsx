@@ -1,36 +1,38 @@
-import { useEffect, useState } from "react";
-import GoogleLoginButton from "./components/GoogleLoginButton";
-import ProfileEditor from "./components/ProfileEditor";
-import type { User } from "./types/auth";
+import { useEffect, useState } from "react"; // React state and lifecycle.
+import GoogleLoginButton from "./components/GoogleLoginButton"; // Google sign-in widget.
+import ProfileEditor from "./components/ProfileEditor"; // Editable profile form.
+import type { User } from "./types/auth"; // User shape shared with the API.
 
-type MeResponse = { user: User } | { error: string };
+type MeResponse = { user: User } | { error: string }; // /me API response union.
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const api = import.meta.env.VITE_API_URL;
+  const [user, setUser] = useState<User | null>(null); // Current session user.
+  const api = import.meta.env.VITE_API_URL; // API base URL from Vite env.
 
   async function loadMe() {
+    // Ask the backend for the current session user.
     const res = await fetch(`${api}/me`, { credentials: "include" });
     if (!res.ok) {
-      setUser(null);
+      setUser(null); // Not logged in or session invalid.
       return;
     }
     const data = (await res.json()) as MeResponse;
-    if ("user" in data) setUser(data.user);
-    else setUser(null);
+    if ("user" in data) setUser(data.user); // Store the user payload.
+    else setUser(null); // Defensive fallback for error payloads.
   }
 
   useEffect(() => {
-    loadMe();
+    loadMe(); // Load session user on first mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function logout() {
+    // Invalidate the session cookie on the server.
     await fetch(`${api}/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
-    setUser(null);
+    setUser(null); // Clear UI state immediately.
   }
 
   return (
@@ -95,7 +97,7 @@ export default function App() {
           <ProfileEditor
             user={user}
             onSave={(u) => {
-              setUser(u);
+              setUser(u); // Sync UI with saved profile.
             }}
           />
         </div>

@@ -1,42 +1,42 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  max-width: 1280px; /* Limit app width on large screens. */
+  margin: 0 auto; /* Center the app container. */
+  padding: 2rem; /* Add breathing room around content. */
+  text-align: center; /* Center text for the default layout. */
 }
 
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+  height: 6em; /* Default logo size. */
+  padding: 1.5em; /* Space around the logo. */
+  will-change: filter; /* Hint for hover effects. */
+  transition: filter 300ms; /* Smooth hover animation. */
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em #646cffaa); /* Glow on hover. */
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em #61dafbaa); /* React-colored glow. */
 }
 
 @keyframes logo-spin {
   from {
-    transform: rotate(0deg);
+    transform: rotate(0deg); /* Start rotation at 0. */
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg); /* Full rotation. */
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+    animation: logo-spin infinite 20s linear; /* Spin when motion allowed. */
   }
 }
 
 .card {
-  padding: 2em;
+  padding: 2em; /* Default card spacing. */
 }
 
 .read-the-docs {
-  color: #888;
+  color: #888; /* Muted helper text. */
 }

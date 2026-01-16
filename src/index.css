@@ -1,68 +1,68 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif; /* Base font stack. */
+  line-height: 1.5; /* Comfortable line height. */
+  font-weight: 400; /* Normal weight. */
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: light dark; /* Respect user color scheme. */
+  color: rgba(255, 255, 255, 0.87); /* Default text color in dark mode. */
+  background-color: #242424; /* Default background in dark mode. */
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none; /* Avoid fake bold/italic rendering. */
+  text-rendering: optimizeLegibility; /* Improve legibility. */
+  -webkit-font-smoothing: antialiased; /* Smooth fonts on WebKit. */
+  -moz-osx-font-smoothing: grayscale; /* Smooth fonts on macOS. */
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  font-weight: 500; /* Slightly heavier links. */
+  color: #646cff; /* Accent link color. */
+  text-decoration: inherit; /* Keep default underline behavior off. */
 }
 a:hover {
-  color: #535bf2;
+  color: #535bf2; /* Darker on hover. */
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  margin: 0; /* Remove default margin. */
+  display: flex; /* Center the app root. */
+  place-items: center; /* Center items both axes. */
+  min-width: 320px; /* Prevent overly narrow layout. */
+  min-height: 100vh; /* Fill the viewport. */
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 3.2em; /* Large heading size. */
+  line-height: 1.1; /* Tighten heading line height. */
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+  border-radius: 8px; /* Rounded corners. */
+  border: 1px solid transparent; /* Avoid layout shift on hover. */
+  padding: 0.6em 1.2em; /* Button spacing. */
+  font-size: 1em; /* Match base font size. */
+  font-weight: 500; /* Emphasize button text. */
+  font-family: inherit; /* Use app font. */
+  background-color: #1a1a1a; /* Dark button background. */
+  cursor: pointer; /* Pointer cursor for buttons. */
+  transition: border-color 0.25s; /* Smooth hover border. */
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #646cff; /* Accent border on hover. */
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 4px auto -webkit-focus-ring-color; /* Accessible focus ring. */
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: #213547; /* Dark text in light mode. */
+    background-color: #ffffff; /* Light background. */
   }
   a:hover {
-    color: #747bff;
+    color: #747bff; /* Softer hover in light mode. */
   }
   button {
-    background-color: #f9f9f9;
+    background-color: #f9f9f9; /* Light button background. */
   }
 }

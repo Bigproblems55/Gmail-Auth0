@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
-import type { User } from "../types/auth";
+import { useMemo, useState } from "react"; // React hooks for state and memo.
+import type { User } from "../types/auth"; // User shape from the API.
 
 type Props = {
-  user: User;
-  onSave?: (user: User) => void;
+  user: User; // Current user record.
+  onSave?: (user: User) => void; // Called after save completes.
 };
 
 type ProfileUpdateBody = {
@@ -18,10 +18,10 @@ type ProfileUpdateBody = {
   address_country?: string | null;
 };
 
-type ProfileUpdateResponse = { user: User } | { error: string };
+type ProfileUpdateResponse = { user: User } | { error: string }; // /profile response.
 
 export default function ProfileEditor({ user, onSave }: Props) {
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_URL; // API base URL from env.
 
   const initial = useMemo(
     () => ({
@@ -35,20 +35,20 @@ export default function ProfileEditor({ user, onSave }: Props) {
       address_postal: user.address_postal ?? "",
       address_country: user.address_country ?? "",
     }),
-    [user]
+    [user] // Recompute when user changes.
   );
 
-  const [form, setForm] = useState(initial);
-  const [saving, setSaving] = useState(false);
-  const [err, setErr] = useState<string>("");
+  const [form, setForm] = useState(initial); // Editable form state.
+  const [saving, setSaving] = useState(false); // Save in progress flag.
+  const [err, setErr] = useState<string>(""); // Inline error message.
 
   function setField<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
-    setForm((p) => ({ ...p, [k]: v }));
+    setForm((p) => ({ ...p, [k]: v })); // Update a single field.
   }
 
   async function save() {
-    setSaving(true);
-    setErr("");
+    setSaving(true); // Disable submit while saving.
+    setErr(""); // Clear any previous errors.
 
     const body: ProfileUpdateBody = {
       username: form.username.trim() ? form.username.trim() : null,
@@ -62,26 +62,26 @@ export default function ProfileEditor({ user, onSave }: Props) {
       address_country: form.address_country.trim()
         ? form.address_country.trim().toUpperCase()
         : null,
-    };
+    }; // Normalize empty values to null for storage.
 
     const res = await fetch(`${api}/profile`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" }, // Send JSON payload.
+      credentials: "include", // Include session cookie.
+      body: JSON.stringify(body), // Serialized profile updates.
     });
 
-    setSaving(false);
+    setSaving(false); // Re-enable submit.
 
     const data = (await res.json().catch(() => ({}))) as ProfileUpdateResponse;
 
     if (!res.ok) {
       const msg = "error" in data ? data.error : "Save failed";
-      setErr(msg);
+      setErr(msg); // Display error to the user.
       return;
     }
 
-    if ("user" in data) onSave?.(data.user);
+    if ("user" in data) onSave?.(data.user); // Bubble updated user to parent.
   }
 
   return (
